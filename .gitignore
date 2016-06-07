@@ -1,12 +1,9 @@
 
 .idea/*
-
 zap-poc.iws
-
 zap-poc.iml
-
 zap-poc.ipr
-
 buildSrc/buildSrc.iml
-
 .gradle/*
+build/*
+buildSrc/*

@@ -13,43 +13,80 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'zap'
 
+ext {
+    drivers = ["firefoxproxy"]
+
+    ext {
+        groovyVersion = '2.4.5'
+        gebVersion = '0.13.1'
+        seleniumVersion = '2.51.0'
+        chromeDriverVersion = '2.19'
+        phantomJsVersion = '1.9.7'
+    }
+}
+
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+
+    ivy {
+        url 'https://github.com/'
+        layout 'pattern', {
+            artifact '/[organisation]/[module]/[revision].[ext]'
+        }
+    }
+}
+
+configurations {
+  zapRuntime
+}
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+
+  // compile gradleApi()
+  // compile localGroovy()
+  compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+  testCompile "org.gebish:geb-spock:$gebVersion"
+  testCompile("org.spockframework:spock-core:1.0-groovy-2.4") {
+      exclude group: "org.codehaus.groovy"
+  }
+  testCompile "org.codehaus.groovy:groovy-all:$groovyVersion"
+
+  // If using JUnit, need to depend on geb-junit (3 or 4)
+  testCompile "org.gebish:geb-junit4:$gebVersion"
+
+  // Drivers
+  testCompile "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
+  testCompile "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
+
+  // We use the awesome Spock testing and specification framework
+  testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+  testCompile 'junit:junit:4.12'
+
+  // zapRuntime 'zaproxy:zaproxy/releases/download/2.5.0:ZAP_2.5.0_Cross_Platform:class@zip'
+  // https://github.com/zaproxy/zaproxy/releases/download/2.5.0/ZAP_2.5.0_Cross_Platform.zip
 }
 
 zapConfig {
   // Required Properties.
      // The directory location containing the ZAP install.
      zapInstallDir = "/Users/nvonop/Downloads/ZAP_2.4.3"
-     // The URL of the application which ZAP should run active scanning against and generate issue reports for.
-     // This should be the URL of the application that you are testing.
+    // zapInstallDir = configurations.zapRuntime.asPath
+
      applicationUrl = "http://www.google.com"
 
      // Optional Properties.
      // The port on which ZAP should run. Defaults to 54300.
-     proxyPort = "9999"
+     proxyPort = "8888"
      // The format of the output report. Acceptable formats are JSON, HTML, and XML.
      reportFormat = "JSON"
      // The path of the report file to write from the zapReport task. This path must be writable, subdirs will NOT be created.
      reportOutputPath = "report"
      // The timeout for the active scanner process. How long should we keep polling for scan completion in minutes. Defaults to 30.
      activeScanTimeout = "30"
-}
-
-// In this section you declare the dependencies for your production and test code
-dependencies {
-
-  compile gradleApi()
-  compile localGroovy()
-  // We use the latest groovy 2.x version for building this library
-    compile 'org.codehaus.groovy:groovy-all:2.4.4'
-
-    // We use the awesome Spock testing and specification framework
-    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
-    testCompile 'junit:junit:4.12'
 }
 
 task zapTest(type: Test) {
